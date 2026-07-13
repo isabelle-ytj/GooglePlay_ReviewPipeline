@@ -155,21 +155,24 @@ The output here is 0. No duplicate review IDs were detected in the collected dat
 ### Repeated Review Text
 This analysis examines whether multiple reviews contain identical review text. Unlike duplicate review IDs, repeated review text does not necessarily indicate duplicate records, as different users may submit the same or very similar comments. Identifying repeated review text helps evaluate the diversity and information content of the collected dataset.
 ```python
+# convert review text to lowercase
+review_tab["content_lower"] = review_tab["content"].str.lower().str.strip()
+
 # Number of repeated review texts
-duplicate_count = review_tab["content"].duplicated().sum()
+duplicate_count = review_tab["content_lower"].duplicated().sum()
 
 # Repeated review texts
-duplicate_text = review_tab[review_tab["content"].duplicated()][["app", "content"]]
+duplicate_text = review_tab[review_tab["content_lower"].duplicated()][["app", "content"]]
 
 # Most common repeated review texts
-duplicate_textCount = review_tab["content"].value_counts()
+duplicate_textCount = review_tab["content_lower"].value_counts()
 duplicate_textCount = duplicate_textCount[duplicate_textCount > 1]
 duplicate_textCount.head(10)
 ```
 #### Output
 ![RepeatedReviewText](OutputImages/repeated_review_text.png)
 
-Repeated review text is common in the dataset, particularly for very short comments. Frequently repeated reviews include generic expressions such as "good", "nice", "very good", and "excellent". These comments are likely produced independently by different users rather than resulting from duplicated records, as no duplicate review IDs were detected. The results suggest that while the dataset is free from duplicated entries, it contains a substantial number of low-information reviews that may contribute limited value for downstream text analysis. Such reviews could be filtered or treated separately during preprocessing if higher-quality textual information is desired.
+Repeated review text is common in the dataset, particularly for very short comments. Frequently repeated reviews included "good", "nice", "very good", and "excellent". These comments are likely produced independently by different users rather than resulting from duplicated records, as no duplicate review IDs were detected. The results suggest that while the dataset is free from duplicated entries, it contains a substantial number of low-information reviews that may contribute limited value for downstream text analysis. Such reviews could be filtered or treated separately during preprocessing if higher-quality textual information is desired.
 
 ### Low-signal Reviews
 Low-signal reviews are comments that contain very little textual information and therefore contribute limited value for downstream text analysis. In this project, reviews with fewer than 10 characters were classified as low-signal reviews. This analysis estimates the proportion of such reviews and provides examples of their content.
