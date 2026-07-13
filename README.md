@@ -75,11 +75,11 @@ axis.set_ylabel("Number of Reviews")
 plot.show()
 ```
 #### Output
-![Review Volume By App](review_volume.png)
+![Review Volume By App](OutputImages/review_volume.png)
 Since the collection process was configured to retrieve up to 1,000 of the most recent reviews per app, this visualization is used to verify that the data collection was completed successfully and that each application contributed a comparable number of reviews. Consistent review counts across applications help reduce sampling bias in subsequent analyses.
 
 ### Rating Distribution
-
+The chart below shows the distribution of review ratings across all collected Google Play reviews. Most reviews received a 5-star rating, while 1-star reviews were the second most common. Ratings of 2, 3, and 4 stars appeared much less frequently. This indicates that the dataset is highly imbalanced, with positive reviews dominating the collection while a smaller but still meaningful number of negative reviews is available for downstream sentiment analysis.
 ```python
 figure, axis = plot.subplots()
 count_data = review_tab["score"].value_counts().sort_index()
@@ -92,7 +92,7 @@ axis.set_ylabel("Frequency")
 plot.show()
 ```
 #### Output
-![Rating Distribution](RatingDistribution.png)
+![Rating Distribution](OutputImages/RatingDistribution.png)
 
 
 ### Text Length
