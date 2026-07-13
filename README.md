@@ -75,7 +75,7 @@ axis.set_ylabel("Number of Reviews")
 plot.show()
 ```
 #### Output
-
+![Review Volume By App](ReviewVolumeByApp.png)
 
 ### Rating Distribution
 
