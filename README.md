@@ -55,7 +55,7 @@ review_tab = pd.concat(all_reviews, ignore_index=True)
 
 ## EDA
 ### Review Volume By App
-The first step of the exploratory data analysis is to examine the number of reviews collected for each application. Since the collection process was configured to retrieve up to 1,000 of the most recent reviews per app, this visualization is used to verify that the data collection was completed successfully and that each application contributed a comparable number of reviews. Consistent review counts across applications help reduce sampling bias in subsequent analyses.
+The first step of the exploratory data analysis is to examine the number of reviews collected for each application. 
 ``` python
 import matplotlib.pyplot as plot
 
@@ -76,8 +76,24 @@ plot.show()
 ```
 #### Output
 ![Review Volume By App](ReviewVolumeByApp.png)
+Since the collection process was configured to retrieve up to 1,000 of the most recent reviews per app, this visualization is used to verify that the data collection was completed successfully and that each application contributed a comparable number of reviews. Consistent review counts across applications help reduce sampling bias in subsequent analyses.
 
 ### Rating Distribution
+
+```python
+figure, axis = plot.subplots()
+count_data = review_tab["score"].value_counts().sort_index()
+ratings = count_data.index
+frequencies = count_data.values
+axis.bar(ratings, frequencies)
+axis.set_title("Rating Distribution")
+axis.set_xlabel("Rating")
+axis.set_ylabel("Frequency")
+plot.show()
+```
+#### Output
+![Review Volume By App](ReviewVolumeByApp.png)
+
 
 ### Text Length
 
