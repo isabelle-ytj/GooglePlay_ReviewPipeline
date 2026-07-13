@@ -75,7 +75,7 @@ axis.set_ylabel("Number of Reviews")
 plot.show()
 ```
 #### Output
-![Review Volume By App](ReviewVolumeByApp.png)
+![Review Volume By App](review_volume.png)
 Since the collection process was configured to retrieve up to 1,000 of the most recent reviews per app, this visualization is used to verify that the data collection was completed successfully and that each application contributed a comparable number of reviews. Consistent review counts across applications help reduce sampling bias in subsequent analyses.
 
 ### Rating Distribution
@@ -92,7 +92,7 @@ axis.set_ylabel("Frequency")
 plot.show()
 ```
 #### Output
-![Review Volume By App](ReviewVolumeByApp.png)
+![Rating Distribution](RatingDistribution.png)
 
 
 ### Text Length
