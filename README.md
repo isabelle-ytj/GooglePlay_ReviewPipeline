@@ -131,12 +131,49 @@ display(review_tab.groupby("app")["at"].max())
 The timestamp coverage varies considerably across applications. Most high-traffic applications, such as YouTube, Spotify, Snapchat, and Discord, have review windows spanning only a few days, indicating a high volume of recent user activity. In contrast, Early Learning Academy covers reviews dating back to January 2024, suggesting a much lower review frequency. Since the collection process retrieves the most recent 1,000 reviews for each application, the length of the time window directly reflects the review activity of each app.
 
 ### Missing Fields
+The table below summarizes the number and percentage of missing values for each field in the collected dataset. Evaluating missing data helps determine whether the dataset is complete enough for downstream processing and identifies fields that may require special handling during data cleaning.
+```python
+missing = pd.DataFrame({
+    "Missing Count": review_tab.isnull().sum(),
+    "Missing Percentage": (review_tab.isnull().mean()*100).round(2)
+})
+missing
+```
+#### Output
+![MissingFields](OutputImages/missing_fields.png)
+
+Most core review fields, including `reviewId`, `userName`, `content`, `score`, `thumbsUpCount`, `at`, and `app`, contain no missing values, indicating that the dataset is complete for review-level analysis. Missing values are mainly concentrated in metadata fields. Specifically, `replyContent` and `repliedAt` are missing for 85.14% of reviews because developer replies are only available when an application owner has responded to a review. In addition, `reviewCreatedVersion` and `appVersion` have approximately 16% missing values, suggesting that version information is unavailable for a subset of reviews. These missing values are expected and are unlikely to affect most text analysis or sentiment modeling tasks.
 
 ### Duplicate Review IDs
+This check identifies whether multiple records share the same review ID. Since `reviewId` is expected to uniquely identify each review, duplicate IDs may indicate duplicated records introduced during the collection or ingestion process.
+```python
+review_tab["reviewId"].duplicated().sum()
+```
+
+The output here is 0. No duplicate review IDs were detected in the collected dataset. This confirms that each review is uniquely identified and suggests that the review collection process did not introduce duplicate records. As a result, `reviewId` can be reliably used as the primary key for downstream database design and data ingestion.
 
 ### Repeated Review Text
+This analysis examines whether multiple reviews contain identical review text. Unlike duplicate review IDs, repeated review text does not necessarily indicate duplicate records, as different users may submit the same or very similar comments. Identifying repeated review text helps evaluate the diversity and information content of the collected dataset.
+```python
+# Number of repeated review texts
+duplicate_count = review_tab["content"].duplicated().sum()
+
+# Repeated review texts
+duplicate_text = review_tab[review_tab["content"].duplicated()][["app", "content"]]
+
+# Most common repeated review texts
+duplicate_textCount = review_tab["content"].value_counts()
+duplicate_textCount = duplicate_textCount[duplicate_textCount > 1]
+duplicate_textCount.head(10)
+```
+#### Output
+![RepeatedReviewText](OutputImages/repeated_review_text.png)
+
+Repeated review text is common in the dataset, particularly for very short comments. Frequently repeated reviews include generic expressions such as "good", "nice", "very good", and "excellent". These comments are likely produced independently by different users rather than resulting from duplicated records, as no duplicate review IDs were detected. The results suggest that while the dataset is free from duplicated entries, it contains a substantial number of low-information reviews that may contribute limited value for downstream text analysis. Such reviews could be filtered or treated separately during preprocessing if higher-quality textual information is desired.
 
 ### Low-signal Reviews
+
+
 
 ### Language Issues
 
