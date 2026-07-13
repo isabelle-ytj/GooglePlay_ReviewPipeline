@@ -93,11 +93,28 @@ plot.show()
 ```
 #### Output
 ![Rating Distribution](OutputImages/RatingDistribution.png)
-
+The rating distribution is highly skewed toward positive feedback. Five-star reviews account for the largest proportion of the dataset, indicating that most users report positive experiences with the selected applications. One-star reviews form the second largest group, suggesting that while dissatisfaction is less common, negative feedback is still substantial enough to support further analysis. Ratings of 2, 3, and 4 stars occur much less frequently, resulting in an imbalanced distribution that should be considered in downstream sentiment analysis and model development.
 
 ### Text Length
+The boxplot below compares the distribution of review text lengths across the ten selected applications. Review length is measured by the number of characters in each review. The boxplots summarize the median, interquartile range (IQR), overall spread, and potential outliers for each application, providing an overview of how detailed user reviews tend to be across different apps.
+```python
+review_tab["text_length"] = review_tab["content"].str.len()
+
+figure, axis = plot.subplots(figsize = (18, 6))
+review_tab.boxplot(column="text_length", by="app", ax=axis)
+axis.set_title("Review Text Length by App")
+axis.set_xlabel("App")
+axis.set_ylabel("Number of Characters")
+plot.show()
+
+figure.savefig("TextLength.png")
+```
+#### Output
+![TextLength](OutputImages/text_length.png)
+Review text lengths vary across applications, although most reviews are relatively short. Early Learning Academy and Discord exhibit the highest median review lengths and the widest interquartile ranges, suggesting that users tend to provide more detailed feedback for these applications. In contrast, Snapchat, YouTube, and WPS Office generally contain shorter reviews. All applications show a considerable number of long-text outliers, with some reviews approaching 500 characters, indicating that while most users leave concise comments, a subset provides substantially more detailed feedback.
 
 ### Timestamp Coverage
+
 
 ### Missing Fields
 
