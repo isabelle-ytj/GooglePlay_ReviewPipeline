@@ -218,7 +218,7 @@ review_other_tab = pd.concat(
 review_other_tab.head(20)
 ```
 #### Output
-Example Output:
+Part of the output:
 ![LanguageIssues](OutputImages/language.png)
 
 The collected reviews are written in Spanish, with user names, review text, and expressions consistently matching the selected language and region. Each application successfully returned 100 reviews, indicating that the language and country filters were applied correctly. This demonstrates that the scraper can support multilingual review collection, making it suitable for future cross-language analysis or international data ingestion pipelines.
