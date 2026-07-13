@@ -95,10 +95,10 @@ plot.show()
 #### Output
 ![Rating Distribution](OutputImages/RatingDistribution.png)
 
-The rating distribution is highly skewed toward positive feedback. Five-star reviews account for the largest proportion of the dataset, indicating that most users report positive experiences with the selected applications. One-star reviews form the second largest group, suggesting that while dissatisfaction is less common, negative feedback is still substantial enough to support further analysis. Ratings of 2, 3, and 4 stars occur much less frequently, resulting in an imbalanced distribution that should be considered in downstream sentiment analysis and model development.
+The rating distribution is highly skewed toward positive feedback. Five-star reviews account for the largest proportion of the dataset, indicating that most users report positive experiences with the selected applications. One-star reviews has the second largest population, suggesting that while dissatisfaction is less common, negative feedback is still substantial enough to support further analysis. Ratings of 2, 3, and 4 stars occur much less frequently, resulting in an imbalanced distribution that should be considered in downstream sentiment analysis and model development.
 
 ### Text Length
-The boxplot below compares the distribution of review text lengths across the ten selected applications. Review length is measured by the number of characters in each review. The boxplots summarize the median, interquartile range (IQR), overall spread, and potential outliers for each application, providing an overview of how detailed user reviews tend to be across different apps.
+Review length is measured by the number of characters in each review. The boxplots summarize the median, IQR, overall spread, and potential outliers for each application, providing an overview of how detailed user reviews tend to be across different apps.
 ```python
 review_tab["text_length"] = review_tab["content"].str.len()
 
@@ -114,7 +114,7 @@ figure.savefig("TextLength.png")
 #### Output
 ![TextLength](OutputImages/TextLength.png)
 
-Review text lengths vary across applications, although most reviews are relatively short. Early Learning Academy and Discord exhibit the highest median review lengths and the widest interquartile ranges, suggesting that users tend to provide more detailed feedback for these applications. In contrast, Snapchat, YouTube, and WPS Office generally contain shorter reviews. All applications show a considerable number of long-text outliers, with some reviews approaching 500 characters, indicating that while most users leave concise comments, a subset provides substantially more detailed feedback.
+The boxplot below compares the distribution of review text lengths across the ten selected apps. Review text lengths vary across applications, although most reviews are relatively short. Early Learning Academy and Discord exhibit the highest median review lengths and the widest IQR ranges, suggesting that users tend to provide more detailed feedback for these applications. In contrast, Snapchat, YouTube, and WPS Office generally contain shorter reviews. All applications show a considerable number of long-text outliers, with some reviews approaching 500 characters, indicating that while most users leave concise comments, a subset provides substantially more detailed feedback.
 
 ### Timestamp Coverage
 The table below summarizes the earliest and latest review timestamps for each application in the dataset. By comparing the time range covered by the collected reviews, we can evaluate how recent the data is and understand the review activity level of each application.
@@ -128,7 +128,7 @@ display(review_tab.groupby("app")["at"].max())
 #### Output
 ![TimestampCoverage](OutputImages/timestamp_coverage.png)
 
-The timestamp coverage varies considerably across applications. Most high-traffic applications, such as YouTube, Spotify, Snapchat, and Discord, have review windows spanning only a few days, indicating a high volume of recent user activity. In contrast, Early Learning Academy covers reviews dating back to January 2024, suggesting a much lower review frequency. Since the collection process retrieves the most recent 1,000 reviews for each application, the length of the time window directly reflects the review activity of each app.
+The timestamp coverage varies considerably across applications. Most high-traffic applications, such as YouTube, and Spotify, have review windows spanning only a few days, indicating a high volume of recent user activity. In contrast, Early Learning Academy covers reviews dating back to January 2024, suggesting a much lower review frequency. Since the collection process retrieves the most recent 1,000 reviews for each application, the length of the time window directly reflects the review activity of each app.
 
 ### Missing Fields
 The table below summarizes the number and percentage of missing values for each field in the collected dataset. Evaluating missing data helps determine whether the dataset is complete enough for downstream processing and identifies fields that may require special handling during data cleaning.
@@ -142,7 +142,7 @@ missing
 #### Output
 ![MissingFields](OutputImages/missing_fields.png)
 
-Most core review fields, including `reviewId`, `userName`, `content`, `score`, `thumbsUpCount`, `at`, and `app`, contain no missing values, indicating that the dataset is complete for review-level analysis. Missing values are mainly concentrated in metadata fields. Specifically, `replyContent` and `repliedAt` are missing for 85.14% of reviews because developer replies are only available when an application owner has responded to a review. In addition, `reviewCreatedVersion` and `appVersion` have approximately 16% missing values, suggesting that version information is unavailable for a subset of reviews. These missing values are expected and are unlikely to affect most text analysis or sentiment modeling tasks.
+Most core review fields, including `reviewId`, `userName`, `content`, `score`, `thumbsUpCount`, `at`, and `app`, contain no missing values, indicating that the dataset is complete for review-level analysis. Missing values are mainly concentrated in a few metadata fields, like `replyContent` and `repliedAt` are missing for 85.14% of reviews because developer replies are only available when an application owner has responded to a review. In addition, `reviewCreatedVersion` and `appVersion` have approximately 16% missing values, suggesting that version information is unavailable for a subset of reviews. These missing values are expected and are unlikely to affect most text analysis or sentiment modeling tasks.
 
 ### Duplicate Review IDs
 This check identifies whether multiple records share the same review ID. Since `reviewId` is expected to uniquely identify each review, duplicate IDs may indicate duplicated records introduced during the collection or ingestion process.
