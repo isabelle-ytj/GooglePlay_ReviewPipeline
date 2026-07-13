@@ -172,12 +172,52 @@ duplicate_textCount.head(10)
 Repeated review text is common in the dataset, particularly for very short comments. Frequently repeated reviews include generic expressions such as "good", "nice", "very good", and "excellent". These comments are likely produced independently by different users rather than resulting from duplicated records, as no duplicate review IDs were detected. The results suggest that while the dataset is free from duplicated entries, it contains a substantial number of low-information reviews that may contribute limited value for downstream text analysis. Such reviews could be filtered or treated separately during preprocessing if higher-quality textual information is desired.
 
 ### Low-signal Reviews
+Low-signal reviews are comments that contain very little textual information and therefore contribute limited value for downstream text analysis. In this project, reviews with fewer than 10 characters were classified as low-signal reviews. This analysis estimates the proportion of such reviews and provides examples of their content.
+```python
+low_signal = review_tab[review_tab["text_length"] < 10]
+len(low_signal)
+len(low_signal) / len(review_tab) * 100
+low_signal["content"].head(20)
+```
+#### Output
+![Low-signalReviews](OutputImages/low-signal_reviews.png)
 
-
+A noticeable portion of the collected reviews contains fewer than 10 characters. Most of these reviews consist of short expressions such as "good", "nice", "ok", "wow", "best app", or emojis. Although these reviews often reflect positive or negative sentiment, they provide little contextual information about user experience, product features, or specific issues. Depending on the objectives of downstream tasks, these reviews may be removed or processed separately to improve the quality of text-based analyses.
 
 ### Language Issues
+To verify that the `google-play-scraper` language and country parameters work as expected, an additional dataset was collected using `lang="es"` and `country="es"`. For each application, 100 of the newest reviews were retrieved and stored in a separate DataFrame. This experiment evaluates whether the scraper can reliably collect reviews from different language markets.
+```python
+all_reviews_other = []
 
+for app_name, app_id in apps_dict.items():
+    result, continuation_token = reviews(
+        app_id,
+        lang="es",
+        country="es",
+        sort=Sort.NEWEST,
+        count=100
+    )
 
+    df = pd.DataFrame(result)
+
+    df["app"] = app_name
+    df["language_setting"] = "Spanish"
+
+    all_reviews_other.append(df)
+
+    print(app_name, len(df))
+
+review_other_tab = pd.concat(
+    all_reviews_other,
+    ignore_index=True
+)
+
+review_other_tab.head(20)
+```
+#### Output
+![LanguageIssues](OutputImages/language.png)
+
+The collected reviews are predominantly written in Spanish, with user names, review text, and expressions consistently matching the selected language and region. Each application successfully returned 100 reviews, indicating that the language and country filters were applied correctly. This demonstrates that the scraper can support multilingual review collection, making it suitable for future cross-language analysis or international data ingestion pipelines.
 
 
 
