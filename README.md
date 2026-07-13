@@ -51,8 +51,6 @@ for app_name, app_id in apps_dict.items():
     
 
 review_tab = pd.concat(all_reviews, ignore_index=True)
-
-review_tab.head(100)
 ```
 
 ## EDA
@@ -76,13 +74,24 @@ axis.set_ylabel("Number of Reviews")
 
 plot.show()
 ```
-
-### 
-
+#### Output
 
 
+### Rating Distribution
 
+### Text Length
 
+### Timestamp Coverage
+
+### Missing Fields
+
+### Duplicate Review IDs
+
+### Repeated Review Text
+
+### Low-signal Reviews
+
+### Language Issues
 
 
 
