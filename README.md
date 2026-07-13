@@ -3,6 +3,7 @@
 This project collects Google Play reviews from multiple popular applications using the `google-play-scraper` package and performs exploratory data analysis to evaluate the quality of the collected data for downstream database constructions.
 
 ## Related Projects Used
+This project mainly used the `google-play-scraper` package for Google Play Store review collection.
 https://github.com/facundoolano/google-play-scraper
 
 ### Installation
