@@ -76,6 +76,7 @@ plot.show()
 ```
 #### Output
 ![Review Volume By App](OutputImages/review_volume.png)
+
 Since the collection process was configured to retrieve up to 1,000 of the most recent reviews per app, this visualization is used to verify that the data collection was completed successfully and that each application contributed a comparable number of reviews. Consistent review counts across applications help reduce sampling bias in subsequent analyses.
 
 ### Rating Distribution
@@ -93,6 +94,7 @@ plot.show()
 ```
 #### Output
 ![Rating Distribution](OutputImages/RatingDistribution.png)
+
 The rating distribution is highly skewed toward positive feedback. Five-star reviews account for the largest proportion of the dataset, indicating that most users report positive experiences with the selected applications. One-star reviews form the second largest group, suggesting that while dissatisfaction is less common, negative feedback is still substantial enough to support further analysis. Ratings of 2, 3, and 4 stars occur much less frequently, resulting in an imbalanced distribution that should be considered in downstream sentiment analysis and model development.
 
 ### Text Length
@@ -110,11 +112,23 @@ plot.show()
 figure.savefig("TextLength.png")
 ```
 #### Output
-![TextLength](OutputImages/text_length.png)
+![TextLength](OutputImages/TextLength.png)
+
 Review text lengths vary across applications, although most reviews are relatively short. Early Learning Academy and Discord exhibit the highest median review lengths and the widest interquartile ranges, suggesting that users tend to provide more detailed feedback for these applications. In contrast, Snapchat, YouTube, and WPS Office generally contain shorter reviews. All applications show a considerable number of long-text outliers, with some reviews approaching 500 characters, indicating that while most users leave concise comments, a subset provides substantially more detailed feedback.
 
 ### Timestamp Coverage
+The table below summarizes the earliest and latest review timestamps for each application in the dataset. By comparing the time range covered by the collected reviews, we can evaluate how recent the data is and understand the review activity level of each application.
+```python
+print("Earliest Review")
+display(review_tab.groupby("app")["at"].min())
 
+print("Latest Review")
+display(review_tab.groupby("app")["at"].max())
+```
+#### Output
+![TimestampCoverage](OutputImages/timestamp_coverage.png)
+
+The timestamp coverage varies considerably across applications. Most high-traffic applications, such as YouTube, Spotify, Snapchat, and Discord, have review windows spanning only a few days, indicating a high volume of recent user activity. In contrast, Early Learning Academy covers reviews dating back to January 2024, suggesting a much lower review frequency. Since the collection process retrieves the most recent 1,000 reviews for each application, the length of the time window directly reflects the review activity of each app.
 
 ### Missing Fields
 
