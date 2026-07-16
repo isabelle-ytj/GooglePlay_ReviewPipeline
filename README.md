@@ -1,6 +1,10 @@
 # Google Play Review Collection
 
-This project collects Google Play reviews from multiple popular applications using the `google-play-scraper` package and performs exploratory data analysis to evaluate the quality of the collected data for downstream database constructions.
+## Project Introduction
+This project evaluates Google Play as a potential source of user-generated review data for downstream AI and data pipeline development. The goal is to assess the feasibility of collecting, structuring, and maintaining app review data for future database storage and ingestion workflows. A review collection pipeline was developed using the `google-play-scraper` package to retrieve reviews from selected applications. The collected data was then examined through exploratory data analysis to understand dataset completeness, consistency, and usability. The findings provide insights into the strengths and limitations of Google Play as a potential long-term review data source.
+
+## Data Source
+Google Play was selected as the primary data source because it provides a large volume of publicly available user reviews across a wide range of applications. Reviews were collected using the google-play-scraper package by querying each application's package ID. 
 
 ## Related Projects Used
 This project mainly used the `google-play-scraper` package for Google Play Store review collection.
@@ -12,11 +16,27 @@ npm install google-play-scraper
 ```
 
 ## Review Collection Procedure
-Review data was collected from Google Play using the `google-play-scraper` Python package. A total of ten popular applications from different categories, including social media, education, productivity, entertainment, AI assistants, and utilities, were selected to provide a diverse sample for evaluating data quality. Each application was identified by its official Google Play package ID to ensure consistent and reproducible data collection
+A total of ten popular applications from different categories, including social media, education, productivity, entertainment, AI assistants, and utilities, were selected to provide a diverse sample for evaluating data quality. Each application was identified by its official Google Play package ID to ensure consistent and reproducible data collection.
+
+The selected applications include: 
+
+| Application | Package ID |
+|--------------|----------|
+| Snapchat | com.snapchat.android |
+| Discord | com.discord |
+| Duolingo | com.duolingo |
+| Early Learning Academy | mobi.abcmouse.academy_goo |
+| YouTube | com.google.android.youtube |
+| Prime Video | com.amazon.avod.thirdpartyclient |
+| WPS Office | cn.wps.moffice_eng |
+| Claude | com.anthropic.claude |
+| Spotify | com.spotify.music |
+| DuckDuckGo | com.duckduckgo.mobile.android |
 
 For each application, the scraper retrieved the 1,000 most recent reviews using the Sort.NEWEST option, resulting in a dataset of approximately 10,000 reviews. The returned review objects were converted into Pandas DataFrames, and an additional app column was added to identify the source app of each review. Finally, the individual DataFrames were merged into a single dataset using pd.concat(), which served as the input for the subsequent EDA.
 
 By default, the langauge is set as English, and the country is set to US.
+
 ```python
 from google_play_scraper import Sort, reviews
 import pandas as pd
