@@ -6,13 +6,15 @@ This project evaluates Google Play as a potential source of user-generated revie
 ## Data Source
 Google Play was selected as the primary data source because it provides a large volume of publicly available user reviews across a wide range of applications. Reviews were collected using the google-play-scraper package by querying each application's package ID. 
 
-## Related Projects Used
+## Related Packages Used
 This project mainly used the `google-play-scraper` package for Google Play Store review collection.
-https://github.com/facundoolano/google-play-scraper
+Additional Python packages are used for data processing and visualization, including `pandas` and `matplotlib`.
+
+For more information about `google-play-scraper` package, visit: https://github.com/facundoolano/google-play-scraper
 
 ### Installation
-```python
-npm install google-play-scraper
+```bash
+pip install google-play-scraper pandas matplotlib
 ```
 
 ## Review Collection Procedure
@@ -35,8 +37,7 @@ The selected applications include:
 
 For each application, the scraper retrieved the 1,000 most recent reviews using the Sort.NEWEST option, resulting in a dataset of approximately 10,000 reviews. The returned review objects were converted into Pandas DataFrames, and an additional app column was added to identify the source app of each review. Finally, the individual DataFrames were merged into a single dataset using pd.concat(), which served as the input for the subsequent EDA.
 
-By default, the langauge is set as English, and the country is set to US.
-
+Reviews were collected using lang="en" and country="us".
 ```python
 from google_play_scraper import Sort, reviews
 import pandas as pd
