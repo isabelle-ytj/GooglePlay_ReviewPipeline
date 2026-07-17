@@ -1,7 +1,7 @@
 # Google Play Review Collection
 
 ## Project Introduction
-This project evaluates Google Play as a potential source of user-generated review data for downstream AI and data pipeline development. The goal is to assess the feasibility of collecting, structuring, and maintaining app review data for future database storage and ingestion workflows. A review collection pipeline was developed using the `google-play-scraper` package to retrieve reviews from selected applications. The collected data was then examined through exploratory data analysis to understand dataset completeness, consistency, and usability. The resulting dataset is intended to support downstream tasks, such as sentiment analysis, and product feedback analysis, by providing structured and traceable review data. The findings provide insights into the strengths and limitations of Google Play as a potential long-term review data source.
+This project evaluates Google Play as a potential source of user-generated review data for downstream AI and data pipeline development. The goal is to assess the feasibility of collecting, structuring, and maintaining app review data for future database storage and ingestion workflows. A review collection pipeline was developed using the `google-play-scraper` package to retrieve reviews from selected applications. The collected data was then examined through exploratory data analysis to understand dataset completeness, consistency, and usability. The findings provide insights into the strengths and limitations of Google Play as a potential long-term review data source.
 
 ## Data Source
 Google Play was selected as the primary data source because it provides a large volume of publicly available user reviews across a wide range of applications. Reviews were collected using the google-play-scraper package by querying each application's package ID. 
@@ -10,9 +10,7 @@ Google Play was selected as the primary data source because it provides a large 
 This project mainly used the `google-play-scraper` package for Google Play Store review collection.
 Additional Python packages are used for data processing and visualization, including `pandas` and `matplotlib`.
 
-For more information about `google-play-scraper` package, visit: 
-
-https://pypi.org/project/google-play-scraper/
+For more information about `google-play-scraper` package, please visit [here](https://pypi.org/project/google-play-scraper/).
 
 ### Installation
 ```bash
