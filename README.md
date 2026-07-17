@@ -10,7 +10,11 @@ Google Play was selected as the primary data source because it provides a large 
 This project mainly used the `google-play-scraper` package for Google Play Store review collection.
 Additional Python packages are used for data processing and visualization, including `pandas` and `matplotlib`.
 
-For more information about `google-play-scraper` package, visit: https://github.com/facundoolano/google-play-scraper
+For more information about `google-play-scraper` package, visit: 
+
+https://github.com/facundoolano/google-play-scraper
+
+https://pypi.org/project/google-play-scraper/
 
 ### Installation
 ```bash
@@ -44,9 +48,8 @@ Optional parameters in function `reviews()`:
 | lang  | Optional, defaults to 'en', the two letter language code in which to fetch the reviews. |
 | country | Optional, defaults to 'us', the two letter country code in which to fetch the reviews. |
 | sort | Optional, defaults to sort.NEWEST. The way the reviews are going to be sorted. Accepted values are: sort.NEWEST, sort.RATING and sort.HELPFULNESS. |
-| num | Optional, defaults to 100. Quantity of reviews to be captured. |
-| paginate | Optional, defaults to false. Defines if the result will be paginated. |
-| nextPaginationToken | Optional, defaults to null. The next token to paginate  |
+| count | Optional, defaults to 100. Quantity of reviews to be captured. |
+| filter_score_with | Defaults to None(means all score). |
 
 For the following demonstrations, reviews were collected using lang="en" and country="us".
 ```python
