@@ -74,7 +74,7 @@ for app_name, app_id in apps_dict.items():
     result, continuation_token = reviews(
         app_id,
         sort=Sort.NEWEST, 
-        count=1000,
+        num=1000,
     )
 
     df = pd.DataFrame(result)
@@ -231,7 +231,7 @@ for app_name, app_id in apps_dict.items():
         lang="es",
         country="es",
         sort=Sort.NEWEST,
-        count=100
+        num=100
     )
 
     df = pd.DataFrame(result)
