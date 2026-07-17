@@ -37,7 +37,7 @@ The selected applications include:
 
 For each application, the scraper retrieved the 1,000 most recent reviews using the Sort.NEWEST option, resulting in a dataset of approximately 10,000 reviews. The returned review objects were converted into Pandas DataFrames, and an additional app column was added to identify the source app of each review. Finally, the individual DataFrames were merged into a single dataset using pd.concat(), which served as the input for the subsequent EDA.
 
-Optional parameters in function `reviews()`:
+Parameters in function `reviews()`:
 | Parameters | Function |
 |--------------|----------|
 | appId | Unique application id for Google Play. |
