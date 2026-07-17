@@ -48,7 +48,7 @@ Optional parameters in function `reviews()`:
 | paginate | Optional, defaults to false. Defines if the result will be paginated. |
 | nextPaginationToken | Optional, defaults to null. The next token to paginate  |
 
-For this project, reviews were collected using lang="en" and country="us".
+For the following demonstrations, reviews were collected using lang="en" and country="us".
 ```python
 from google_play_scraper import Sort, reviews
 import pandas as pd
