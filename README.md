@@ -1,7 +1,7 @@
 # Google Play Review Collection
 
 ## Project Introduction
-This project evaluates Google Play as a potential source of user-generated review data for downstream AI and data pipeline development. The goal is to assess the feasibility of collecting, structuring, and maintaining app review data for future database storage and ingestion workflows. A review collection pipeline was developed using the `google-play-scraper` package to retrieve reviews from selected applications. The collected data was then examined through exploratory data analysis to understand dataset completeness, consistency, and usability. The findings provide insights into the strengths and limitations of Google Play as a potential long-term review data source.
+This project evaluates Google Play as a potential source of user-generated review data for downstream AI and data pipeline development. The goal is to assess the feasibility of collecting, structuring, and maintaining app review data for future database storage and ingestion workflows. A review collection pipeline was developed using the `google-play-scraper` package to retrieve reviews from selected applications. The collected data was then examined through exploratory data analysis to understand dataset completeness, consistency, and usability. The resulting dataset is intended to support downstream tasks, such as sentiment analysis, and product feedback analysis, by providing structured and traceable review data. The findings provide insights into the strengths and limitations of Google Play as a potential long-term review data source.
 
 ## Data Source
 Google Play was selected as the primary data source because it provides a large volume of publicly available user reviews across a wide range of applications. Reviews were collected using the google-play-scraper package by querying each application's package ID. 
@@ -257,6 +257,23 @@ Part of the output:
 
 The collected reviews are written in Spanish, with user names, review text, and expressions consistently matching the selected language and region. Each application successfully returned 100 reviews, indicating that the language and country filters were applied correctly. This demonstrates that the scraper can support multilingual review collection, making it suitable for future cross-language analysis or international data ingestion pipelines.
 
+### Summary EDA
+- Approximately 10,000 reviews were collected from 10 popular Google Play applications using a consistent collection strategy.
+- The dataset contains complete core fields (review ID, review text, rating, timestamp), making it suitable for downstream analysis.
+- No duplicate review IDs were found, indicating that review IDs can serve as reliable unique identifiers.
+- Most missing values occur in developer reply and app version-related fields, as expected, because not every review receives a developer response or reports an app version.
+- Review text lengths and rating distributions vary across applications, while repeated review texts are primarily short, low-information comments (e.g., "good", "nice") rather than duplicated records.
+- Because reviews were collected using Sort.NEWEST, high-traffic apps cover shorter time windows, whereas lower-traffic apps include reviews spanning much longer periods.
 
+### Current Limitations
+- The dataset only contains the most recent reviews and should not be treated as complete historical data. To retrieve all review data, the function `reviews()` could be replaced with `reviews_all()`.
+- Data was collected only from Google Play using English (US) settings, so reviews from other regions, languages, or platforms are not included. Need additional settings to retrieve reviews from other regions or languages.
+- Some metadata (e.g., app version and developer replies) is unavailable for a portion of reviews because it is not always provided by Google Play.
+- Low-signal reviews (such as very short comments or emoji-only responses) remain in the raw dataset and require additional filtering for certain analyses. Need to be seperated from repeated contents.
 
+### Next Steps
+- Separate raw reviews, processed reviews, quality assessment results, and ingestion metadata into dedicated tables.
+- Build a repeatable ingestion pipeline that supports scheduled review collection and timely updates.
+- Apply additional preprocessing, including text normalization, and low-signal and repeated content filtering.
+- Use the processed dataset for later downstream tasks.
 
