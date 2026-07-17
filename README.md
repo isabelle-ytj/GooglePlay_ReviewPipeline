@@ -12,8 +12,6 @@ Additional Python packages are used for data processing and visualization, inclu
 
 For more information about `google-play-scraper` package, visit: 
 
-https://github.com/facundoolano/google-play-scraper
-
 https://pypi.org/project/google-play-scraper/
 
 ### Installation
