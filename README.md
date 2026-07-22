@@ -282,4 +282,53 @@ This schema is designed to support the collection, storage, and processing of Go
 
 ### Table Description
 ### `app_info`
+Stores information about each application being collected from a review platform.
+
+`app_id`: Unique application identifier (e.g., Google Play package ID)
+
+`platform`: Review source platform (e.g., Google Play)
+
+`app_name`: Human-readable application name
+
+Primary Key (Composite): (`app_id`, `platform`)
+Foreign Key: None
+
+### `raw_review`
+Stores immutable, original review data directly fetched from the source platform. 
+
+`raw_id`: Internal database identifier
+
+`review_id`: Review identifier provided by the source platform
+
+`app_id`: Unique application identifier
+
+`platform`: Review source platform
+
+`user_name`: Reviewer name
+
+`content`: Original review text
+
+`rating`: Review rating
+
+`thumbs_up_count`: Helpful vote count
+
+`review_time`: Review creation time
+
+`developer_reply`: Developer response
+
+`developer_reply_time`: Time of developer response
+
+`app_version`: Application version
+
+`review_created_version`: Application version when the review was created (usually align with `app_version`
+
+`ingested_at`: Timestamp when the review was first collected
+
+Primary Key (Composite): `raw_id`
+Foreign Key: (`platform`, `app_id`) --> app_info(`platform`, `app_id`)
+
+
+
+
+
 
