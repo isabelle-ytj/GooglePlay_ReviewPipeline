@@ -321,7 +321,7 @@ Stores immutable, original review data directly fetched from the source platform
 
 `app_version`: Application version
 
-`review_created_version`: Application version when the review was created (usually align with `app_version`
+`review_created_version`: Application version when the review was created (usually align with `app_version`)
 
 `ingested_at`: Timestamp when the review was first collected
 
@@ -340,7 +340,7 @@ Stores cleaned and standardized review text generated from the raw review table.
 
 Primary Key: `raw_id`
 
-Foreign Key: (`raw_id`) --> raw_review(`raw_id`)
+Foreign Key: `raw_id` --> raw_review(`raw_id`)
 
 ### `ingestion_run`
 Stores metadata for each review collection run. Each record represents one execution of the collection pipeline for a specific application under a specific collection configuration.
@@ -386,7 +386,7 @@ Records the relationship between reviews and ingestion runs. This table enables 
 
 Primary Key (Composite): (`raw_id`, `run_id`)
 
-Foreign Key: (`raw_id`) --> raw_review(`raw_id`), (`run_id`) --> ingestion_run(`run_id`)
+Foreign Key: `raw_id` --> raw_review(`raw_id`), `run_id` --> ingestion_run(`run_id`)
 
 ### `review_quality`
 Stores quality assessment results derived from the processed review data.
@@ -407,12 +407,12 @@ Stores quality assessment results derived from the processed review data.
 
 `is_missing_developer_reply_time`: Missing developer reply timestamp
 
-Primary Key (Composite): `raw_id`
+Primary Key: `raw_id`
 
-Foreign Key: (`raw_id`) --> processed_review(`raw_id`)
+Foreign Key: `raw_id` --> processed_review(`raw_id`)
 
 ### Deduplication Logic
-Although no duplicate review IDs were observed in the current Google Play dataset, using the source-provided review_id alone is not considered sufficiently robust for long-term database design. The database therefore uses an internal surrogate key (raw_id) as the primary key, while review uniqueness is determined using the following composite identifier: (platform, app_id, review_id).
+Although no duplicate review IDs were observed in the current Google Play dataset, using the source-provided review_id alone is not considered sufficiently robust for long-term database design. The database uses an internal surrogate key (raw_id) as the primary key. To prevent duplicate reviews, a unique constraint is defined on (platform, app_id, review_id). 
 
 This composite key ensures that:
 - review IDs remain unique across different applications;
@@ -445,6 +445,7 @@ The preprocessing stage then transforms each raw review into a processed review 
 - converting text into a standardized format (e.g., lowercase);
 - generating the cleaned review text (cleaned_content);
 - calculating the review text length (content_length).
+
 The processed results are stored in the `processed_review` table and linked to the corresponding raw review through the `raw_id` field.
 
 After preprocessing, the cleaned reviews are evaluated using a set of predefined quality rules. The resulting quality flags are stored in the `review_quality` table, enabling downstream filtering and quality analysis without modifying either the raw or processed review data.
