@@ -291,6 +291,7 @@ Stores information about each application being collected from a review platform
 `app_name`: Human-readable application name
 
 Primary Key (Composite): (`app_id`, `platform`)
+
 Foreign Key: None
 
 ### `raw_review`
@@ -324,11 +325,90 @@ Stores immutable, original review data directly fetched from the source platform
 
 `ingested_at`: Timestamp when the review was first collected
 
-Primary Key (Composite): `raw_id`
+Primary Key: `raw_id`
+
 Foreign Key: (`platform`, `app_id`) --> app_info(`platform`, `app_id`)
 
+### `processed_review`
+Stores cleaned and standardized review text generated from the raw review table. The original review remains unchanged to preserve data provenance.
 
+`raw_id`: Associated raw review identifier provided by the source platform.
 
+`cleaned_content`: Normalized review text
 
+`content_length`: Length of cleaned review text
+
+Primary Key: `raw_id`
+
+Foreign Key: (`raw_id`) --> raw_review(`raw_id`)
+
+### `ingestion_run`
+Stores metadata for each review collection run. Each record represents one execution of the collection pipeline for a specific application under a specific collection configuration.
+
+`run_id`: Unique ingestion run identifier
+
+`app_id`: Application identifier of the app collected during this run
+
+`platform`: Source platform
+
+`collect_at`: Collection timestamp
+
+`language`: Language parameter used during collection
+
+`country`: Country parameter used during collection
+
+`sort_method`: Review sorting method (e.g., newest)
+
+`target_review_count`: Number of reviews requested
+
+`actual_review_count`: Number of reviews returned
+
+`skipped_duplicates`: Number of duplicate reviews skipped
+
+`inserted_records`: Number of new reviews inserted into the database
+
+`status`: Overall execution status
+
+`error_message`: Error information if the run failed
+
+Primary Key: `run_id`
+
+Foreign Key: (`app_id`, `platform`) --> app_info(`app_id`, `platform`)
+
+### `review_ingestion`
+Records the relationship between reviews and ingestion runs. This table enables recurring collections by tracking which reviews were observed during each collection run.
+
+`raw_id`: Internal database identifier
+
+`run_id`: Ingestion run identifier
+
+`record_status`: Status of the review during this run (Inserted, Duplicate, Updated)
+
+Primary Key (Composite): (`raw_id`, `run_id`)
+
+Foreign Key: (`raw_id`) --> raw_review(`raw_id`), (`run_id`) --> ingestion_run(`run_id`)
+
+### `review_quality`
+Stores quality assessment results derived from the processed review data.
+
+`raw_id`: Internal database identifier
+
+`is_empty_content`: Indicates whether the review content is empty
+
+`is_repeated_text`: Indicates duplicated review text
+
+`is_low_signal`: Indicates low-information reviews
+
+`is_missing_created_version`: Missing review creation version
+
+`is_missing_app_version`: Missing application version
+
+`is_missing_developer_reply`: Missing developer reply
+
+`is_missing_developer_reply_time`: Missing developer reply timestamp
+
+Primary Key (Composite): `raw_id`
+
+Foreign Key: (`raw_id`) --> processed_review(`raw_id`)
 
 
