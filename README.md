@@ -275,3 +275,11 @@ The collected reviews are written in Spanish, with user names, review text, and 
 - Apply additional preprocessing, including text normalization, and low-signal and repeated content filtering.
 - Use the processed dataset for later downstream tasks.
 
+## Schema Design
+### Overview
+This schema is designed to support the collection, storage, and processing of Google Play review data. The design separates raw review data from processed data and quality evaluation results while also tracking each ingestion run for reproducibility and future recurring collection. Although the current implementation focuses on Google Play, the schema includes a platform field to support future expansion to additional review sources.
+![schemadiagram](GooglePlayReview_SchemaDiagram.png)
+
+### Table Description
+### `app_info`
+
