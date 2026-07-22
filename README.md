@@ -424,8 +424,29 @@ During each ingestion run, incoming reviews are compared against the existing co
 - Otherwise, a new raw review record will be inserted.
 
 ### Quality Flag Logic
+All quality flags are computed from cleaned_content from table processed_review after raw review ingestion:
+| Flag | Logic |
+|--------------|----------|
+| is_empty_content | TRUE if the review content is empty or null after preprocessing. |
+| is_repeated_text | TRUE if the normalized review text is identical to another review collected for the same application. |
+| is_low_signal | TRUE if the review contains little meaningful information, such as very short text or generic expressions (e.g., "Good", "Nice", "OK"). |
+| is_missing_created_version | TRUE if the review_created_version field is missing. |
+| is_missing_app_version | TRUE if the app_version field is missing. |
+| is_missing_developer_reply | TRUE if no developer reply is available. |
+| is_missing_developer_reply_time | TRUE if the developer reply timestamp is missing. |
+
+Separating quality flags from both the raw and processed review tables allows the quality assessment logic to evolve independently while preserving the original data. These flags can be used for filtering low-quality reviews, monitoring dataset completeness, and supporting downstream tasks such as sentiment analysis.
+
+### How Raw Reviews Connect To Processed Reviews
+During each ingestion run, reviews are first collected from the platform and stored in the `raw_review` table without modification. These records preserve the original review text and metadata exactly as returned by the source platform.
+
+The preprocessing stage then transforms each raw review into a processed review by performing basic text normalization, including:
+- removing leading and trailing whitespace, and emojis;
+- converting text into a standardized format (e.g., lowercase);
+- generating the cleaned review text (cleaned_content);
+- calculating the review text length (content_length).
+The processed results are stored in the `processed_review` table and linked to the corresponding raw review through the `raw_id` field.
+
+After preprocessing, the cleaned reviews are evaluated using a set of predefined quality rules. The resulting quality flags are stored in the `review_quality` table, enabling downstream filtering and quality analysis without modifying either the raw or processed review data.
 
 
-### how raw reviews connect to processed reviews
-
-### what metadata should be stored for each ingestion run
