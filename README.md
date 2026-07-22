@@ -411,4 +411,21 @@ Primary Key (Composite): `raw_id`
 
 Foreign Key: (`raw_id`) --> processed_review(`raw_id`)
 
+### Deduplication Logic
+Although no duplicate review IDs were observed in the current Google Play dataset, using the source-provided review_id alone is not considered sufficiently robust for long-term database design. The database therefore uses an internal surrogate key (raw_id) as the primary key, while review uniqueness is determined using the following composite identifier: (platform, app_id, review_id).
 
+This composite key ensures that:
+- review IDs remain unique across different applications;
+- future support for multiple review platforms can be added without changing the schema;
+- recurring ingestion runs can reliably identify previously collected reviews.
+
+During each ingestion run, incoming reviews are compared against the existing composite key:
+- If the combination already exists, the review is marked as duplicate.
+- Otherwise, a new raw review record will be inserted.
+
+### Quality Flag Logic
+
+
+### how raw reviews connect to processed reviews
+
+### what metadata should be stored for each ingestion run
