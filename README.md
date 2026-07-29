@@ -389,23 +389,23 @@ Primary Key (Composite): (`raw_id`, `run_id`)
 Foreign Key: `raw_id` --> raw_review(`raw_id`), `run_id` --> ingestion_run(`run_id`)
 
 ### `review_quality`
-Stores quality assessment results derived from the processed review data.
+Stores quality assessment results derived from the raw review data and processed review data.
 
 `raw_id`: Internal database identifier
 
-`is_empty_content`: Indicates whether the review content is empty
+`is_empty_content`: Indicates whether the processed review content is empty
 
-`is_repeated_text`: Indicates duplicated review text
+`is_repeated_text`: Indicates duplicated raw review text
 
-`is_low_signal`: Indicates low-information reviews
+`is_low_signal`: Indicates low-information processed reviews
 
-`is_missing_created_version`: Missing review creation version
+`is_missing_created_version`: Missing review creation version from `raw_review` table
 
-`is_missing_app_version`: Missing application version
+`is_missing_app_version`: Missing application version from `raw_review` table
 
-`is_missing_developer_reply`: Missing developer reply
+`is_missing_developer_reply`: Missing developer reply from `raw_review` table
 
-`is_missing_developer_reply_time`: Missing developer reply timestamp
+`is_missing_developer_reply_time`: Missing developer reply timestamp from `raw_review` table
 
 Primary Key: `raw_id`
 
@@ -424,16 +424,17 @@ During each ingestion run, incoming reviews are compared against the existing co
 - Otherwise, a new raw review record will be inserted.
 
 ### Quality Flag Logic
-All quality flags are computed from cleaned_content from table processed_review after raw review ingestion:
+Quality checks are performed using both raw and processed review attributes. Raw review fields are used to validate source data completeness and ingestion quality, while processed review fields are used to evaluate text quality after cleaning. The generated quality flags are stored in the review_quality table and linked back to the original review through raw_id.
+
 | Flag | Logic |
 |--------------|----------|
-| is_empty_content | TRUE if the review content is empty or null after preprocessing. |
-| is_repeated_text | TRUE if the normalized review text is identical to another review collected for the same application. |
-| is_low_signal | TRUE if the review contains little meaningful information, such as very short text or generic expressions (e.g., "Good", "Nice", "OK"). |
-| is_missing_created_version | TRUE if the review_created_version field is missing. |
-| is_missing_app_version | TRUE if the app_version field is missing. |
-| is_missing_developer_reply | TRUE if no developer reply is available. |
-| is_missing_developer_reply_time | TRUE if the developer reply timestamp is missing. |
+| is_empty_content | TRUE if the review content is empty or null after processing. |
+| is_repeated_text | TRUE if the raw review text is identical to another review collected for the same application. |
+| is_low_signal | TRUE if the processed review contains little meaningful information, such as very short text or generic expressions (e.g., "Good", "Nice", "OK"). |
+| is_missing_created_version | TRUE if the review_created_version field from `raw_review` table is missing. |
+| is_missing_app_version | TRUE if the app_version field from `raw_review` table is missing. |
+| is_missing_developer_reply | TRUE if no developer reply from `raw_review` table is available. |
+| is_missing_developer_reply_time | TRUE if the developer reply timestamp from `raw_review` table is missing. |
 
 Separating quality flags from both the raw and processed review tables allows the quality assessment logic to evolve independently while preserving the original data. These flags can be used for filtering low-quality reviews, monitoring dataset completeness, and supporting downstream tasks such as sentiment analysis.
 
