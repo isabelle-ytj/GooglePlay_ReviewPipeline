@@ -382,7 +382,7 @@ Records the relationship between reviews and ingestion runs. This table enables 
 
 `run_id`: Ingestion run identifier
 
-`record_status`: Status of the review during this run (Inserted, Duplicate, Updated)
+`record_status`: Status of the review during this run (Inserted, Duplicate)
 
 Primary Key (Composite): (`raw_id`, `run_id`)
 
@@ -553,36 +553,376 @@ connection.commit()
 # To check whether the information is successfully stored
 print("app_info inserted!")
 ```
-To verify data in app_info table:
+
+After insertion, the stored application metadata can be verified using: 
 ```python
 cursor.execute("SELECT * FROM app_info")
 
 for row in cursor.fetchall():
     print(row)
 ```
-The table contents can be verified by querying the stored application metadata after insertion.
+#### Review Collection and Ingestion
+After application metadata is stored in the `app_info` table, the pipeline collects review data from Google Play and loads the data into the database.
 
+The ingestion process performs the following steps:
+1. Collects the newest reviews from Google Play using the `google-play-scraper` package.
+2. Creates an ingestion record in the `ingestion_run` table to track each collection execution.
+3. Inserts original review data into the `raw_review` table while preserving source information.
+4. Records the relationship between reviews and ingestion runs in the `review_ingestion` table.
+5. Updates ingestion statistics, including inserted records and skipped duplicate reviews.
 
+The collection configuration includes:
+- Language: English (`en`)
+- Country: United States (`us`)
+- Sorting method: Newest reviews
+- Target reviews per application: 50
 
+```python
+from google_play_scraper import Sort, reviews
+import pandas as pd
+from datetime import datetime
 
+# Settings
+language = "en"
+country = "us"
+sort_method = "NEWEST"
+target_count = 50
 
+all_reviews=[]
 
+# review collection
+for app_name, app_id in apps_dict.items():
+    result, continuation_token = reviews(
+        app_id,
+        sort=Sort.NEWEST,
+        lang=language,
+        country=country,
+        count=target_count,
+    )
 
+    actual_count = len(result)
+    print(app_name, actual_count)
+```
 
+Then, we will create ingestion_run table.
 
+The `ingestion_run` table records metadata for each execution of the ingestion pipeline.
 
+A new ingestion run is created before loading reviews because the final ingestion results, such as inserted records and duplicate records, are only available after the loading process is completed.
 
+Initial values are assigned before ingestion:
+- `inserted_records = 0`
+- `skipped_duplicates = 0`
+- `error_message = NULL`
 
+These fields are updated after the review insertion process finishes with the actual ingestion results.
 
+```python
+sql = "INSERT INTO ingestion_run(app_id,platform,collect_at,language,country,sort_method,target_review_count,actual_review_count,skipped_duplicates,inserted_records,status,error_message) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    values = (app_id, "Google Play", datetime.now(), language, country, sort_method, target_count, actual_count, 0, 0, "completed", None)
 
+    cursor.execute(sql, values)
+    run_id = cursor.lastrowid
+```
 
+Next, the `raw_review` table will store the original review data collected from Google Play.
 
+The raw layer preserves source information without modification. The original review data is stored separately from processed data to maintain data traceability and allow future reprocessing.
 
+```python
+sql_raw = "INSERT IGNORE INTO raw_review(review_id,app_id,platform,user_name,content,rating,thumbs_up_count,review_time,developer_reply,developer_reply_time,app_version,review_created_version,ingested_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
 
+    for review in result:
+        values_raw = (
+            review["reviewId"],
+            app_id,
+            "Google Play",
+            review["userName"],
+            review["content"],
+            review["score"],
+            review["thumbsUpCount"],
+            review["at"],
+            review["replyContent"],
+            review["repliedAt"],
+            review["appVersion"],
+            review["reviewCreatedVersion"],
+            datetime.now()
+        )
+        cursor.execute(sql_raw, values_raw)
+```
+During the loading process, each collected review is checked to determine whether it is a new record or an existing review. And all of these results will be stored in a new table, the `review_ingestion` table. This table provides ingestion history tracking by recording whether a review was newly inserted or identified as a duplicate during a specific ingestion run. The pipeline uses the insertion result from the `raw_review` table to determine the ingestion status:
+- If a review is successfully inserted into `raw_review`, the pipeline retrieves the generated `raw_id` and creates a corresponding record in `review_ingestion` with the status `Inserted`.
+- If a review already exists, the insertion is skipped due to the uniqueness constraint. The pipeline retrieves the existing `raw_id` and creates a new `review_ingestion` record with the status `Duplicate`.
 
+This approach allows the pipeline to prevent duplicate storage while maintaining a complete history of review ingestion attempts across different runs.
 
+```python
+        if cursor.rowcount == 1:
+            inserted_records += 1
+            raw_id = cursor.lastrowid
 
+            #review_ingestion
+            sql_ingestion = "INSERT INTO review_ingestion(raw_id,run_id,record_status) VALUES(%s,%s,%s)"
+            values_ingestion = (
+                raw_id,
+                run_id,
+                "Inserted"
+            )
+            cursor.execute(sql_ingestion, values_ingestion)
+        else:
+            skipped_duplicates += 1
+            #review_ingestion
+            sql_find = "SELECT raw_id FROM raw_review WHERE review_id=%s AND app_id=%s AND platform=%s"
+            values_find = (
+                review["reviewId"], 
+                app_id, 
+                "Google Play"
+            )
+            cursor.execute(sql_find,values_find)
+            raw_id = cursor.fetchone()[0]
+            sql_ingestion = "INSERT INTO review_ingestion(raw_id,run_id,record_status) VALUES(%s,%s,%s)"
+            values_ingestion = (
+                raw_id,
+                run_id,
+                "Duplicate"
+            )
+            cursor.execute(sql_ingestion,values_ingestion)
+```
+Now, since all raw reviews are inserted, we can now update the fields like inserted records and duplicate records.
+```python
+    sql_update = "UPDATE ingestion_run SET inserted_records = %s, skipped_duplicates = %s WHERE run_id = %s"
+    
+        cursor.execute(
+            sql_update,
+            (
+                inserted_records,
+                skipped_duplicates,
+                run_id
+            )
+        )
+        connection.commit()
+    
+        print(
+            app_name,
+            "finished:",
+            inserted_records,
+            "inserted,",
+            skipped_duplicates,
+            "duplicates"
+        )
+```
+To check these three tables we just created:
+```python
+# ingestion_run table CHECK
+cursor.execute("SELECT * FROM ingestion_run")
 
+for row in cursor.fetchall():
+    print(row)
+
+# raw_review table CHECK
+cursor.execute("SELECT * FROM raw_review LIMIT 10")
+
+for row in cursor.fetchall():
+    print(row)
+
+# review_ingestion table CHECK
+cursor.execute("SELECT * FROM review_ingestion LIMIT 20")
+
+for row in cursor.fetchall():
+    print(row)
+```
+#### processed_review table
+The `processed_review` table stores transformed review text generated from the original data in the `raw_review` table. The purpose of this table is to prepare review content for downstream analysis, such as sentiment analysis and natural language processing tasks, while preserving the original raw data.
+
+Each processed review is linked to its original record through `raw_id`, maintaining traceability between raw and processed data.
+
+The preprocessing pipeline includes:
+- Removing emojis and non-text symbols. ([Related package used](https://gist.github.com/slowkow/7a7f61f495e3dbb7e3d767f97bd7304b))
+- Converting text to lowercase.
+- Normalizing whitespace.
+- Calculating cleaned text length.
+
+The original review content is kept unchanged in the `raw_review` table, while cleaned text is stored separately in `processed_review` to support future reprocessing and analysis.
+```python
+# processed_review table
+import re
+
+def remove_emoji(string):
+    if string is None:
+        return None
+    
+    emoji_pattern = re.compile("["
+                               u"\U0001F600-\U0001F64F"  # emoticons
+                               u"\U0001F300-\U0001F5FF"  # symbols & pictographs
+                               u"\U0001F680-\U0001F6FF"  # transport & map symbols
+                               u"\U0001F1E0-\U0001F1FF"  # flags (iOS)
+                               u"\U00002500-\U00002BEF"  # chinese char
+                               u"\U00002702-\U000027B0"
+                               u"\U000024C2-\U0001F251"
+                               u"\U0001f926-\U0001f937"
+                               u"\U00010000-\U0010ffff"
+                               u"\u2640-\u2642"
+                               u"\u2600-\u2B55"
+                               u"\u200d"
+                               u"\u23cf"
+                               u"\u23e9"
+                               u"\u231a"
+                               u"\ufe0f"  # dingbats
+                               u"\u3030"
+                               "]+", flags=re.UNICODE)
+    
+    return emoji_pattern.sub(r'', string)
+
+def clean_review(text):
+
+    if text is None:
+        return None
+
+    text = remove_emoji(text)
+    text = text.lower()
+    text = " ".join(text.split())
+    text = text.strip()
+
+    return text
+
+sql_takeraw = "SELECT raw_id, content FROM raw_review"
+cursor.execute(sql_takeraw)
+raw_reviews = cursor.fetchall()
+
+for raw_id, content in raw_reviews:
+
+    cleaned_content = clean_review(content)
+    if cleaned_content:
+        content_length = len(cleaned_content)
+    else:
+        content_length = 0
+
+    sql_process = "INSERT IGNORE INTO processed_review(raw_id,cleaned_content,content_length) VALUES (%s,%s,%s)"
+    values_process = (
+        raw_id,
+        cleaned_content,
+        content_length
+    )
+    cursor.execute(sql_process, values_process)
+
+connection.commit()
+
+print("processed_review completed!")
+```
+
+The following query can be used to check the cleaned content and length stored in the processed_review table.
+```python
+cursor.execute("SELECT * FROM processed_review LIMIT 10")
+
+for row in cursor.fetchall():
+    print(row)
+```
+
+#### review_quality table
+The `review_quality` table stores data quality assessment results for each review. The purpose of this table is to identify potential issues in the collected review data and support downstream data validation.
+
+Each quality record is linked to the original review through `raw_id`, allowing quality issues to be traced back to the original source data.
+
+The quality checks include:
+
+- Empty review content
+- Repeated review text
+- Low-signal reviews
+- Missing review metadata
+    - Missing review created version
+    - Missing app version
+    - Missing developer reply
+    - Missing developer reply time
+For each review, quality flags are initialized as `0` and updated to `1` when a specific issue is detected.
+
+The quality evaluation includes:
+```python
+cursor.execute("SELECT raw_id,content,review_created_version,app_version,developer_reply,developer_reply_time FROM raw_review")
+raw_reviews_more = cursor.fetchall()
+
+seen_text = set()
+
+for (raw_id,content,review_created_version,app_version,developer_reply,developer_reply_time) in raw_reviews_more:
+    
+    cleaned_content = clean_review(content)
+    if cleaned_content:
+        content_length = len(cleaned_content)
+    else:
+        content_length = 0
+
+    # default values
+    is_empty_content = 0
+    is_repeated_text = 0
+    is_low_signal = 0
+    is_missing_created_version = 0
+    is_missing_app_version = 0
+    is_missing_developer_reply = 0
+    is_missing_developer_reply_time = 0
+
+    # empty content
+    if cleaned_content is None or len(cleaned_content.strip()) == 0:
+        is_empty_content = 1
+
+    # repeated text
+    if content:
+        text = content.lower().strip()
+        if text in seen_text:
+            is_repeated_text = 1
+        else:
+            seen_text.add(text)
+            
+    # low signal
+    if cleaned_content:
+        if len(cleaned_content.strip()) < 5:
+            is_low_signal = 1
+
+    # missing fields
+    if review_created_version is None:
+        is_missing_created_version = 1
+    if app_version is None:
+        is_missing_app_version = 1
+    if developer_reply is None:
+        is_missing_developer_reply = 1
+    if developer_reply_time is None:
+        is_missing_developer_reply_time = 1
+```
+After evaluation, the generated quality flags are stored in the `review_quality` table. Each record corresponds to one raw review and contains binary indicators representing detected quality issues.
+
+Multiple flags can exist for the same review because a single review may contain more than one quality issue.
+```python
+    # insert quality table
+    sql_quality = "INSERT IGNORE INTO review_quality(raw_id,is_empty_content,is_repeated_text,is_low_signal,is_missing_created_version,is_missing_app_version,is_missing_developer_reply,is_missing_developer_reply_time) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"
+    values_quality = (
+        raw_id,
+        is_empty_content,
+        is_repeated_text,
+        is_low_signal,
+        is_missing_created_version,
+        is_missing_app_version,
+        is_missing_developer_reply,
+        is_missing_developer_reply_time
+    )
+    cursor.execute(
+        sql_quality,
+        values_quality
+    )
+
+connection.commit()
+print("review_quality completed!")
+```
+This following validation step confirms that each review is correctly linked to its corresponding quality record and that detected issues are properly recorded.
+```python
+# review_quality table CHECK
+cursor.execute("SELECT * FROM review_quality LIMIT 10")
+
+for row in cursor.fetchall():
+    print(row)
+```
+
+## Conclusion
+This project establishes an end-to-end review data pipeline that collects Google Play reviews, stores them in a structured MySQL database, processes text data, and evaluates data quality.
+
+The pipeline design separates raw data storage, data transformation, and quality monitoring, enabling better data traceability, maintainability, and future expansion. The integration test confirms that the workflow can successfully support ingestion tracking, duplicate handling, review processing, and quality validation.
 
 
 
