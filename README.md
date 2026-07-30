@@ -571,12 +571,6 @@ The ingestion process performs the following steps:
 4. Records the relationship between reviews and ingestion runs in the `review_ingestion` table.
 5. Updates ingestion statistics, including inserted records and skipped duplicate reviews.
 
-The collection configuration includes:
-- Language: English (`en`)
-- Country: United States (`us`)
-- Sorting method: Newest reviews
-- Target reviews per application: 50
-
 ```python
 from google_play_scraper import Sort, reviews
 import pandas as pd
@@ -626,9 +620,6 @@ sql = "INSERT INTO ingestion_run(app_id,platform,collect_at,language,country,sor
 ```
 
 Next, the `raw_review` table will store the original review data collected from Google Play.
-
-The raw layer preserves source information without modification. The original review data is stored separately from processed data to maintain data traceability and allow future reprocessing.
-
 ```python
 sql_raw = "INSERT IGNORE INTO raw_review(review_id,app_id,platform,user_name,content,rating,thumbs_up_count,review_time,developer_reply,developer_reply_time,app_version,review_created_version,ingested_at) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
 
@@ -833,9 +824,9 @@ The quality checks include:
     - Missing app version
     - Missing developer reply
     - Missing developer reply time
+
 For each review, quality flags are initialized as `0` and updated to `1` when a specific issue is detected.
 
-The quality evaluation includes:
 ```python
 cursor.execute("SELECT raw_id,content,review_created_version,app_version,developer_reply,developer_reply_time FROM raw_review")
 raw_reviews_more = cursor.fetchall()
