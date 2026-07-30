@@ -565,8 +565,8 @@ for row in cursor.fetchall():
 After application metadata is stored in the `app_info` table, the pipeline collects review data from Google Play and loads the data into the database.
 
 The ingestion process performs the following steps:
-1. Collects the newest reviews from Google Play using the `google-play-scraper` package.
-2. Creates an ingestion record in the `ingestion_run` table to track each collection execution.
+1. Creates an ingestion record in the `ingestion_run` table to track each collection execution.
+2. Collects the newest reviews from Google Play using the `google-play-scraper` package.
 3. Inserts original review data into the `raw_review` table while preserving source information.
 4. Records the relationship between reviews and ingestion runs in the `review_ingestion` table.
 5. Updates ingestion statistics, including inserted records and skipped duplicate reviews.
