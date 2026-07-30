@@ -278,7 +278,7 @@ The collected reviews are written in Spanish, with user names, review text, and 
 ## Schema Design
 ### Overview
 This schema is designed to support the collection, storage, and processing of Google Play review data. The design separates raw review data from processed data and quality evaluation results while also tracking each ingestion run for reproducibility and future recurring collection. Although the current implementation focuses on Google Play, the schema includes a platform field to support future expansion to additional review sources.
-![schemadiagram](GooglePlayReview_SchemaDiagram.png)
+![schemadiagram](Integration_Test/review_collection_schema_design_diagram.png)
 
 ### Table Description
 ### `app_info`
@@ -450,5 +450,78 @@ The preprocessing stage then transforms each raw review into a processed review 
 The processed results are stored in the `processed_review` table and linked to the corresponding raw review through the `raw_id` field.
 
 After preprocessing, the cleaned reviews are evaluated using a set of predefined quality rules. The resulting quality flags are stored in the `review_quality` table, enabling downstream filtering and quality analysis without modifying either the raw or processed review data.
+
+## Integration Test
+### Overview
+The integration test validates the data pipeline by running a small-scale ingestion workflow and verifying that collected reviews can be correctly stored, processed, and linked across database tables.
+
+The test focuses on:
+- review collection from Google Play
+- ingestion run tracking
+- raw review insertion and deduplication
+- raw-to-processed review transformation
+- review quality flag generation
+
+### Test Setup
+A small-scale dataset was used to validate the end-to-end pipeline workflow. The test collected Google Play reviews from 10 selected applications. For each application, the pipeline retrieved up to 50 of the newest reviews.
+
+The test's specific settings are: 
+- Language: English (`en`)
+- Country: United States (`us`)
+- Sort method: Newest reviews (`NEWEST`)
+
+The integration test was executed twice using the same configuration to verify the ingestion run tracking across multiple executions and duplicate review detection.
+
+### Related Package Used
+In addition to the packages mentioned above, package `mysql-connector-python` is used to connect mySQL and python. 
+
+For more information about `mysql-connector-python` package, please visit [here](https://www.w3schools.com/python/python_mysql_getstarted.asp).
+
+#### Installation
+```bash
+!pip install mysql-connector-python
+```
+
+### SQL Database Construction
+The database was constructed in MySQL to store, process, and maintain Google Play review data. It is based on the designed relational schema. SQL scripts were used to create tables, define primary and foreign key relationships, and enforce uniqueness constraints for review deduplication. The database separates raw review storage, ingestion tracking, text processing, and quality monitoring into different tables. This structure preserves original data while supporting downstream processing and quality validation.
+
+### Connect MySQL And Python
+Python was connected with MySQL to enable automated data ingestion, transformation, and validation within the review data pipeline. The connection was established using the `mysql-connector-python` package, allowing Python scripts to execute SQL queries and interact with database tables directly.
+```python
+import mysql.connector
+connection = mysql.connector.connect(
+    host="localhost",
+    # The connection parameters (username, password, and database name) should be updated according to the local MySQL server environment before running the code
+    user=your_username,
+    password=your_password,
+    database="review_collection"
+)
+
+# To check whether the connection is successful
+print("Connected successfully!")
+```
+
+To verify that Python is connected to the correct MySQL database, the available tables can be retrieved using the following query:
+```python
+cursor = connection.cursor()
+cursor.execute("SHOW TABLES")
+
+for table in cursor:
+    print(table)
+```
+If the connection is successful, all the table names in the database should be printed out.
+
+### Data Ingestion Pipeline Construction
+
+
+
+
+
+
+
+
+
+
+
 
 
