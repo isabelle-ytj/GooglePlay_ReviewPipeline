@@ -485,7 +485,7 @@ For more information about `mysql-connector-python` package, please visit [here]
 ### SQL Database Construction
 The database was constructed in MySQL to store, process, and maintain Google Play review data. It is based on the designed relational schema. SQL scripts were used to create tables, define primary and foreign key relationships, and enforce uniqueness constraints for review deduplication. The database separates raw review storage, ingestion tracking, text processing, and quality monitoring into different tables. This structure preserves original data while supporting downstream processing and quality validation.
 
-### Connect MySQL And Python
+### Connecting MySQL And Python
 Python was connected with MySQL to enable automated data ingestion, transformation, and validation within the review data pipeline. The connection was established using the `mysql-connector-python` package, allowing Python scripts to execute SQL queries and interact with database tables directly.
 ```python
 import mysql.connector
