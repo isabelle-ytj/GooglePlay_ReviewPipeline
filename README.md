@@ -511,7 +511,68 @@ for table in cursor:
 ```
 If the connection is successful, all the table names in the database should be printed out.
 
-### Data Ingestion Pipeline Construction
+### Data Ingestion Pipeline Implementation
+#### app_info table
+The `app_info` table stores metadata for each application included in the review collection process. Before inserting review data, application information is loaded into the database to provide a reference for downstream ingestion records.
+
+The table stores:
+- Application ID (package ID)
+- Platform
+- Application name
+
+Each application is uniquely identified by the combination of platform and application ID to prevent duplicate application records.
+
+```python
+# app list
+apps_dict = {
+    "Snapchat": "com.snapchat.android", 
+    "Discord": "com.discord",
+    "Duolingo": "com.duolingo",
+    "Early Learning Academy": "mobi.abcmouse.academy_goo",
+    "YouTube": "com.google.android.youtube",
+    "Prime Video": "com.amazon.avod.thirdpartyclient", 
+    "WPS Office-PDF, Word, Sheet": "cn.wps.moffice_eng",
+    "Claude by Anthropic": "com.anthropic.claude",
+    "Spotify: Music and Podcasts": "com.spotify.music",
+    "DuckDuckGo, optional Duck.ai": "com.duckduckgo.mobile.android"
+}
+
+# app_info table
+sql_appinfo = "INSERT IGNORE INTO app_info (app_id, platform, app_name) VALUES (%s, %s, %s)"
+
+for app_name, app_id in apps_dict.items():
+    values_appinfo = (
+        app_id,
+        "Google Play",
+        app_name
+    )
+    cursor.execute(sql_appinfo, values_appinfo)
+
+connection.commit()
+
+# To check whether the information is successfully stored
+print("app_info inserted!")
+```
+To verify data in app_info table:
+```python
+cursor.execute("SELECT * FROM app_info")
+
+for row in cursor.fetchall():
+    print(row)
+```
+The table contents can be verified by querying the stored application metadata after insertion.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
